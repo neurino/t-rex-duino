@@ -215,7 +215,8 @@ void splashScreen() {
     memcpy_P(buff, splash_screen_bitmap + 2 + uint16_t(i) * sizeof(buff), sizeof(buff));
     lcd.fillScreen(buff, sizeof(buff));
   }
-  for(uint8_t i = 50; i && !isPressedJump(); --i) delay(100);
+  const uint32_t splashStart = millis();
+  while(!isPressedJump() && millis() - splashStart < 5000);
 }
 
 void setup() {
@@ -237,7 +238,8 @@ void loop() {
     gameLoop(hiScore);
     EEPROM.put(EEPROM_HI_SCORE, hiScore);
     //wait until the jump button is released
-    while(isPressedJump()) delay(100);
-    delay(500);
+    while(isPressedJump());
+    const uint32_t restartDelayStart = millis();
+    while(millis() - restartDelayStart < 500);
   }
 }
