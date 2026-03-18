@@ -1,27 +1,30 @@
 # T-Rex-duino
 
-<img width="350" align="right" src="img/t-rex-demo-3.gif" />
-
 Clone of T-rex game from Chrome browser rewritten for Arduino.
 
-Just 3 components needed:
+Forked from [github.com/AlexIII/t-rex-duino] to support SSD1306 0.96"
+OLED display using SPI and re-organised as a [PlatformIO][] project.
 
-- Arduino Uno / Nano / Pro Mini
-- OLED display 128x64 SSD1309
+A few components needed:
+
+- Arduino Pro Mini (easy to change target in `platformio.ini`)
+- SPI OLED display 128x64 SSD1306 (or SSD1309)
 - A button (or two, if you want to duck!)
-
-[Youtube video](https://www.youtube.com/watch?v=635SnybBRD8)
 
 ## Instructions
 
-0. Assemble
-
-<img width="600" src="img/sch.png" />
-
-1. Flash [that sketch](https://github.com/AlexIII/t-rex-duino/releases/download/v1.0/Arduino-sketch-t-rex-duino-v1.0.zip) to your Arduino
-2. Play!
-3. Repeat from step 2
+1. Assemble
+2. [Install PlatformIO core][]
+3. `$ pio run -t upload`
+4. Play!
+5. Repeat from step 4
 
 ## License
 
-MIT License © github.com/AlexIII
+MIT License  
+© 2020 github.com/AlexIII  
+© 2026 github.com/neurino
+
+[github.com/AlexIII/t-rex-duino]: https://github.com/AlexIII/t-rex-duino
+[PlatformIO]: https://platformio.org/
+[Install PlatformIO core]: https://docs.platformio.org/en/latest/core/installation/index.html

@@ -7,7 +7,7 @@
  * License: MIT
  * -------Hardware------
  * Board: Arduino Uno / Nano / Pro / pro mini
- * LCD: OLED SSD1309 128x64
+ * LCD: OLED SSD1306 128x64
 */ 
 
 /* Game Balance Settings */
@@ -29,9 +29,9 @@
 #define JUMP_BUTTON 6
 #define DUCK_BUTTON 5
 //LCD
-#define LCD_CS 2
-#define LCD_DC 3
-#define LCD_RESET 4
+#define LCD_CS 10
+#define LCD_DC 9
+#define LCD_RESET 8
 //LCD_SDA -> 11 (SPI SCK)
 //LCD_SCL -> 13 (SPI MOSI)
 
@@ -46,7 +46,7 @@
 /* Includes */
 #include <SPI.h>
 #include <EEPROM.h>
-#include "SSD1309.h"
+#include "SSD1306.h"
 #include "array.h"
 #include "TrexPlayer.h"
 #include "Ground.h"
@@ -74,7 +74,7 @@
 #endif
 #define LCD_PART_BUFF_SZ ((LCD_PART_BUFF_HEIGHT/8)*LCD_PART_BUFF_WIDTH)
 
-static SSD1309<SPIClass> lcd(SPI, LCD_CS, LCD_DC, LCD_RESET, LCD_BYTE_SZIE);
+static SSD1306<SPIClass> lcd(SPI, LCD_CS, LCD_DC, LCD_RESET, LCD_BYTE_SZIE);
 static uint16_t hiScore = 0;
 static bool firstStart = true;
 
@@ -223,7 +223,7 @@ void gameLoop(uint16_t &hiScore) {
 }
 
 void spalshScreen() {
-  lcd.setAddressingMode(SSD1309<SPIClass>::HorizontalAddressingMode);
+  lcd.setAddressingMode(SSD1306<SPIClass>::HorizontalAddressingMode);
   //Awful, I know. But it just for the splash screen.
   for(uint16_t i = 0; i < LCD_BYTE_SZIE; ++i) {
     const uint8_t v = pgm_read_byte(splash_screen_bitmap + 2 + i);
@@ -238,7 +238,7 @@ void setup() {
   Serial.begin(250000);
   lcd.begin();
   spalshScreen();
-  lcd.setAddressingMode(LCD_IF_VIRTUAL_WIDTH(SSD1309<SPIClass>::VerticalAddressingMode, SSD1309<SPIClass>::HorizontalAddressingMode));
+  lcd.setAddressingMode(LCD_IF_VIRTUAL_WIDTH(SSD1306<SPIClass>::VerticalAddressingMode, SSD1306<SPIClass>::HorizontalAddressingMode));
   srand((randByte()<<8) | randByte());
   //EEPROM.put(EEPROM_HI_SCORE, hiScore); //uncomment to set HI score to 0
   EEPROM.get(EEPROM_HI_SCORE, hiScore);
