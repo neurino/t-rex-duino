@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+IMG_DIR="$REPO_DIR/img/game-bitmaps"
+ASSET_DIR="$REPO_DIR/src/assets"
+CONVERTER="$SCRIPT_DIR/img-conv.py"
+
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON_BIN=python3
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_BIN=python
+else
+  echo "python3 or python is required" >&2
+  exit 1
+fi
+
+shopt -s nullglob
+
+for png_path in "$IMG_DIR"/*.png; do
+  png_name="$(basename "$png_path")"
+  header_name="${png_name%.png}"
+
+  if [[ "$header_name" =~ ^(.*-[0-9])s(-.*)?$ ]]; then
+    header_name="${BASH_REMATCH[1]}${BASH_REMATCH[2]}"
+  fi
+
+  "$PYTHON_BIN" "$CONVERTER" "$png_path" > "$ASSET_DIR/$header_name.h"
+done
