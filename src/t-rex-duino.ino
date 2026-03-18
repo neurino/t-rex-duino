@@ -223,7 +223,7 @@ void gameLoop(uint16_t &hiScore) {
 }
 
 void spalshScreen() {
-  lcd.setAddressingMode(SSD1306<SPIClass>::HorizontalAddressingMode);
+  lcd.setAddressingMode(lcd.HorizontalAddressingMode);
   //Awful, I know. But it just for the splash screen.
   for(uint16_t i = 0; i < LCD_BYTE_SZIE; ++i) {
     const uint8_t v = pgm_read_byte(splash_screen_bitmap + 2 + i);
