@@ -208,12 +208,12 @@ void gameLoop(uint16_t &hiScore) {
   } 
 }
 
-void spalshScreen() {
+void splashScreen() {
   lcd.setAddressingMode(lcd.HorizontalAddressingMode);
-  //Awful, I know. But it just for the splash screen.
-  for(uint16_t i = 0; i < LCD_BYTE_SZIE; ++i) {
-    const uint8_t v = pgm_read_byte(splash_screen_bitmap + 2 + i);
-    lcd.fillScreen(&v, 1);
+  uint8_t buff[32];
+  for(uint8_t i = 0; i < LCD_BYTE_SZIE/sizeof(buff); ++i) {
+    memcpy_P(buff, splash_screen_bitmap + 2 + uint16_t(i) * sizeof(buff), sizeof(buff));
+    lcd.fillScreen(buff, sizeof(buff));
   }
   for(uint8_t i = 50; i && !isPressedJump(); --i) delay(100);
 }
@@ -223,8 +223,8 @@ void setup() {
   pinMode(DUCK_BUTTON, INPUT_PULLUP);
   Serial.begin(250000);
   lcd.begin();
-  spalshScreen();
-  lcd.setAddressingMode(SSD1306<SPIClass>::VerticalAddressingMode);
+  splashScreen();
+  lcd.setAddressingMode(lcd.VerticalAddressingMode);
   srand((randByte()<<8) | randByte());
   //EEPROM.put(EEPROM_HI_SCORE, hiScore); //uncomment to set HI score to 0
   EEPROM.get(EEPROM_HI_SCORE, hiScore);
