@@ -58,21 +58,7 @@
 #define EEPROM_HI_SCORE 16 //2 bytes
 #define LCD_BYTE_SZIE (LCD_WIDTH*LCD_HEIGHT/8)
 
-#ifdef VIRTUAL_WIDTH_BUFFER_COLS
-  #define LCD_IF_VIRTUAL_WIDTH(TRUE_COND, FALSE_COND) TRUE_COND
-  #define LCD_PART_BUFF_WIDTH VIRTUAL_WIDTH_BUFFER_COLS
-  #define LCD_PART_BUFF_HEIGHT LCD_HEIGHT
-#else
-  #define LCD_IF_VIRTUAL_WIDTH(TRUE_COND, FALSE_COND) FALSE_COND
-  #ifdef VIRTUAL_HEIGHT_BUFFER_ROWS_BY_8_PIXELS
-    #define LCD_PART_BUFF_WIDTH LCD_WIDTH
-    #define LCD_PART_BUFF_HEIGHT (VIRTUAL_HEIGHT_BUFFER_ROWS_BY_8_PIXELS*8)
-  #else
-    #define LCD_PART_BUFF_WIDTH LCD_WIDTH
-    #define LCD_PART_BUFF_HEIGHT LCD_HEIGHT
-  #endif
-#endif
-#define LCD_PART_BUFF_SZ ((LCD_PART_BUFF_HEIGHT/8)*LCD_PART_BUFF_WIDTH)
+#define LCD_PART_BUFF_SZ ((LCD_HEIGHT/8)*VIRTUAL_WIDTH_BUFFER_COLS)
 
 static SSD1306<SPIClass> lcd(SPI, LCD_CS, LCD_DC, LCD_RESET, LCD_BYTE_SZIE);
 static uint16_t hiScore = 0;
@@ -112,11 +98,11 @@ void renderNumber(BitCanvas& canvas, Point2Di8 point, const uint16_t number) {
 void gameLoop(uint16_t &hiScore) {
   uint8_t lcdBuff[LCD_PART_BUFF_SZ];
   VirtualBitCanvas bitCanvas(
-    LCD_IF_VIRTUAL_WIDTH(VirtualBitCanvas::VIRTUAL_WIDTH, VirtualBitCanvas::VIRTUAL_HEIGHT), 
+    VirtualBitCanvas::VIRTUAL_WIDTH,
     lcdBuff, 
-    LCD_PART_BUFF_HEIGHT,
-    LCD_PART_BUFF_WIDTH,
-    LCD_IF_VIRTUAL_WIDTH(LCD_WIDTH, LCD_HEIGHT) //virtual size in selected direction
+    LCD_HEIGHT,
+    VIRTUAL_WIDTH_BUFFER_COLS,
+    LCD_WIDTH //virtual size in selected direction
   );
 
   SpawnHold spawnHolder;
@@ -166,7 +152,7 @@ void gameLoop(uint16_t &hiScore) {
         bitCanvas.render(restartIconSprite);
       }
       //update screen
-      lcd.fillScreen(lcdBuff, LCD_PART_BUFF_SZ, LCD_IF_VIRTUAL_WIDTH(LCD_PART_BUFF_WIDTH, 0));
+      lcd.fillScreen(lcdBuff, LCD_PART_BUFF_SZ, VIRTUAL_WIDTH_BUFFER_COLS);
       if(bitCanvas.nextPart()) break;
     }
 
@@ -238,7 +224,7 @@ void setup() {
   Serial.begin(250000);
   lcd.begin();
   spalshScreen();
-  lcd.setAddressingMode(LCD_IF_VIRTUAL_WIDTH(SSD1306<SPIClass>::VerticalAddressingMode, SSD1306<SPIClass>::HorizontalAddressingMode));
+  lcd.setAddressingMode(SSD1306<SPIClass>::VerticalAddressingMode);
   srand((randByte()<<8) | randByte());
   //EEPROM.put(EEPROM_HI_SCORE, hiScore); //uncomment to set HI score to 0
   EEPROM.get(EEPROM_HI_SCORE, hiScore);
