@@ -1,14 +1,15 @@
 /*
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome browser rewritten for Arduino
- * Project page: https://github.com/AlexIII/t-rex-duino
- * Author: github.com/AlexIII
- * E-mail: endoftheworld@bk.ru
+ * Project page: https://github.com/neurino/t-rex-duino
+ * Authors: github.com/AlexIII & github.com/neurino
  * License: MIT
  * -------Hardware------
  * Board: Arduino Uno / Nano / Pro / pro mini
  * LCD: OLED SSD1306 128x64
 */ 
+
+//#define PRINT_DEBUG_INFO //uncomment to print CPU usage to Serial
 
 /* Game Balance Settings */
 #define PLAYER_SAFE_ZONE_WIDTH 32 //minimum distance between obstacles (px)
@@ -56,11 +57,10 @@
 
 /* Defines and globals */
 #define EEPROM_HI_SCORE 16 //2 bytes
-#define LCD_BYTE_SZIE (LCD_WIDTH*LCD_HEIGHT/8)
+#define LCD_BYTE_SIZE (LCD_WIDTH * LCD_HEIGHT / 8)
+#define LCD_PART_BUFF_SIZE ((LCD_HEIGHT / 8) * VIRTUAL_WIDTH_BUFFER_COLS)
 
-#define LCD_PART_BUFF_SZ ((LCD_HEIGHT/8)*VIRTUAL_WIDTH_BUFFER_COLS)
-
-static SSD1306<SPIClass> lcd(SPI, LCD_CS, LCD_DC, LCD_RESET, LCD_BYTE_SZIE);
+static SSD1306<SPIClass> lcd(SPI, LCD_CS, LCD_DC, LCD_RESET, LCD_BYTE_SIZE);
 static uint16_t hiScore = 0;
 static bool firstStart = true;
 
@@ -96,7 +96,7 @@ void renderNumber(BitCanvas& canvas, Point2Di8 point, const uint16_t number) {
 }
 
 void gameLoop(uint16_t &hiScore) {
-  uint8_t lcdBuff[LCD_PART_BUFF_SZ];
+  uint8_t lcdBuff[LCD_PART_BUFF_SIZE];
   VirtualBitCanvas bitCanvas(
     VirtualBitCanvas::VIRTUAL_WIDTH,
     lcdBuff, 
@@ -147,24 +147,24 @@ void gameLoop(uint16_t &hiScore) {
       for(uint8_t i = 0; i < sprites.size(); ++i)
         bitCanvas.render(*sprites[i]);
       //game over
-      if(gameOver) {
+      if (gameOver) {
         bitCanvas.render(gameOverSprite);
         bitCanvas.render(restartIconSprite);
       }
       //update screen
-      lcd.fillScreen(lcdBuff, LCD_PART_BUFF_SZ, VIRTUAL_WIDTH_BUFFER_COLS);
-      if(bitCanvas.nextPart()) break;
+      lcd.fillScreen(lcdBuff, LCD_PART_BUFF_SIZE, VIRTUAL_WIDTH_BUFFER_COLS);
+      if (bitCanvas.nextPart()) break;
     }
 
     //exit game on game over
-    if(gameOver) {
-      if(score > hiScore) hiScore = score;
+    if (gameOver) {
+      if (score > hiScore) hiScore = score;
       return;
     }
 
     //collision detection
-    if(!trex.isBlinking() && CollisionDetector::check(trex, enemies.data, enemies.size())) {
-      if(lives) {
+    if (!trex.isBlinking() && CollisionDetector::check(trex, enemies.data, enemies.size())) {
+      if (lives) {
         trex.blink();
         --lives;
       } else {
@@ -173,34 +173,36 @@ void gameLoop(uint16_t &hiScore) {
         continue;
       }
     }
-    if(lives < LIVES_MAX && CollisionDetector::check(trex, heartLive)) {
+    if (lives < LIVES_MAX && CollisionDetector::check(trex, heartLive)) {
       ++lives;
       heartLive.eat();
     }
 
     //constrols
-    if(isPressedJump()) trex.jump();
+    if (isPressedJump()) trex.jump();
     trex.duck(isPressedDuck());
 
     //logic and animation step
     for(uint8_t i = 0; i < sprites.size(); ++i)
       sprites[i]->step();
     //score keeping
-    if(score < 0xFFFE) ++score;
+    if (score < 0xFFFE) ++score;
     //make game progressively faster
-    if(!(score % INCREASE_FPS_EVERY_N_SCORE_POINTS) && targetFPS < TARGET_FPS_MAX) ++targetFPS;
+    if (!(score % INCREASE_FPS_EVERY_N_SCORE_POINTS) && targetFPS < TARGET_FPS_MAX) ++targetFPS;
     heartsSprite.limitRenderWidthTo = 6*lives + 1;
     //switch day and night
-    if(!(score % DAY_NIGHT_SWITCH_CYCLES)) lcd.setInverse(night = !night);
+    if (!(score % DAY_NIGHT_SWITCH_CYCLES)) lcd.setInverse(night = !night);
 
+    const uint8_t frameTime = 1000 / targetFPS;
+#ifdef PRINT_DEBUG_INFO
     //print CPU load statistics
     const uint32_t dt = millis() - prvT;
-    const uint8_t frameTime = 1000 / targetFPS;
     uint32_t left = frameTime > dt ? frameTime - dt : 0;
     Serial.print("CPU ");
     Serial.print(100 - 100 * left / frameTime);
     Serial.print("% ");
     Serial.println(dt);
+#endif
 
     //throttle
     while(millis() - prvT < frameTime);
@@ -211,7 +213,7 @@ void gameLoop(uint16_t &hiScore) {
 void splashScreen() {
   lcd.setAddressingMode(lcd.HorizontalAddressingMode);
   uint8_t buff[32];
-  for(uint8_t i = 0; i < LCD_BYTE_SZIE/sizeof(buff); ++i) {
+  for(uint8_t i = 0; i < LCD_BYTE_SIZE/sizeof(buff); ++i) {
     memcpy_P(buff, splash_screen_bitmap + 2 + uint16_t(i) * sizeof(buff), sizeof(buff));
     lcd.fillScreen(buff, sizeof(buff));
   }
@@ -222,21 +224,24 @@ void splashScreen() {
 void setup() {
   pinMode(JUMP_BUTTON, INPUT_PULLUP);
   pinMode(DUCK_BUTTON, INPUT_PULLUP);
-  if(isPressedJump() && isPressedDuck()) {
+  if (isPressedJump() && isPressedDuck()) {
     hiScore = 0;
     EEPROM.put(EEPROM_HI_SCORE, hiScore);
+  } else {
+    EEPROM.get(EEPROM_HI_SCORE, hiScore);
+    if (hiScore == 0xFFFF) hiScore = 0; // 0xFFFF is the default EEPROM erased state
   }
+#ifdef PRINT_DEBUG_INFO  
   Serial.begin(57600);
+#endif
   lcd.begin();
   splashScreen();
   lcd.setAddressingMode(lcd.VerticalAddressingMode);
   srand((randByte() << 8) | randByte());
-  EEPROM.get(EEPROM_HI_SCORE, hiScore);
-  if(hiScore == 0xFFFF) hiScore = 0;
 }
 
 void loop() {
-  if(firstStart || isPressedJump()) {
+  if (firstStart || isPressedJump()) {
     firstStart = false;
     gameLoop(hiScore);
     EEPROM.update(EEPROM_HI_SCORE, hiScore & 0xFF);

@@ -1,9 +1,8 @@
 /*
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
- * Project page: https://github.com/AlexIII/t-rex-duino
+ * Project page: https://github.com/neurino/t-rex-duino
  * Author: github.com/AlexIII
- * E-mail: endoftheworld@bk.ru
  * License: MIT
 */ 
 
@@ -33,13 +32,13 @@ struct Cactus : SpireScrollingToLeft {
 
   virtual void step() override {
     SpireScrollingToLeft::step();
-    if(!isActive()) {
-      if(respawnWait) {
+    if (!isActive()) {
+      if (respawnWait) {
         --respawnWait;
         return;
       }
       
-      if(!spawnHolder.tryAcquire(this, PLAYER_SAFE_ZONE_WIDTH))
+      if (!spawnHolder.tryAcquire(this, PLAYER_SAFE_ZONE_WIDTH))
         return;
             
       const uint16_t r = rand();

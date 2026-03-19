@@ -1,9 +1,8 @@
 /*
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
- * Project page: https://github.com/AlexIII/t-rex-duino
+ * Project page: https://github.com/neurino/t-rex-duino
  * Author: github.com/AlexIII
- * E-mail: endoftheworld@bk.ru
  * License: MIT
 */ 
 
@@ -21,8 +20,8 @@ struct HeartLive : SpireScrollingToLeft {
 
   virtual void step() override {
     SpireScrollingToLeft::step();
-    if(!isActive()) {
-      if(respawnWait) {
+    if (!isActive()) {
+      if (respawnWait) {
         --respawnWait;
         return;
       }

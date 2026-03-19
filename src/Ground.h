@@ -1,9 +1,8 @@
 /*
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
- * Project page: https://github.com/AlexIII/t-rex-duino
+ * Project page: https://github.com/neurino/t-rex-duino
  * Author: github.com/AlexIII
- * E-mail: endoftheworld@bk.ru
  * License: MIT
 */ 
 
@@ -22,7 +21,7 @@ struct Ground : SpireScrollingToLeft {
   virtual void step() override {
     for(uint8_t i = 0; i < speed; ++i) {
       --position.x;
-      if(!isActive()) {
+      if (!isActive()) {
         bitmap = ground_sprites[rand()&7];
         rearm();
       }

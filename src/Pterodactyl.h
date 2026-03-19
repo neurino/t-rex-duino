@@ -1,9 +1,8 @@
 /*
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
- * Project page: https://github.com/AlexIII/t-rex-duino
+ * Project page: https://github.com/neurino/t-rex-duino
  * Author: github.com/AlexIII
- * E-mail: endoftheworld@bk.ru
  * License: MIT
 */ 
 
@@ -26,13 +25,13 @@ struct Pterodactyl : SpireScrollingToLeft {
   virtual void step() override {
     SpireScrollingToLeft::step();
     animationStep();
-    if(!isActive()) {
-      if(respawnWait) {
+    if (!isActive()) {
+      if (respawnWait) {
         --respawnWait;
         return;
       }
       
-      if(!spawnHolder.tryAcquire(this, PLAYER_SAFE_ZONE_WIDTH * 2))
+      if (!spawnHolder.tryAcquire(this, PLAYER_SAFE_ZONE_WIDTH * 2))
         return;
       
       const uint16_t r = rand();
@@ -48,7 +47,7 @@ private:
 
   uint8_t animationSkip = 0;
   void animationStep() {
-    if(animationSkip) {
+    if (animationSkip) {
       --animationSkip;
       return;
     }

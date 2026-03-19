@@ -1,9 +1,8 @@
 /*
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
- * Project page: https://github.com/AlexIII/t-rex-duino
+ * Project page: https://github.com/neurino/t-rex-duino
  * Author: github.com/AlexIII
- * E-mail: endoftheworld@bk.ru
  * License: MIT
 */ 
 
@@ -137,7 +136,7 @@ private:
   void sendBytes(const uint8_t* d, uint16_t sz, const bool data, const uint8_t stride = 0) {
     digitalWrite(dc, data);
     digitalWrite(cs, LOW);
-    if(!stride)
+    if (!stride)
       while(sz--) spi.transfer(*d++);
     else
       for(uint8_t i = 0; i < stride; ++i)

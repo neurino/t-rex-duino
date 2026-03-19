@@ -1,9 +1,8 @@
 /*
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
- * Project page: https://github.com/AlexIII/t-rex-duino
+ * Project page: https://github.com/neurino/t-rex-duino
  * Author: github.com/AlexIII
- * E-mail: endoftheworld@bk.ru
  * License: MIT
 */ 
 
@@ -88,7 +87,7 @@ struct Symbol {
   Symbol(const uint8_t* const flashBitmap, const uint8_t width, const uint8_t height, const uint8_t nSymbols) :
     cur(flashBitmap, 0, width, height), sprite(&cur, {0, 0}), bitmapBase((const flash_uint8_t*)flashBitmap), nSymbols(nSymbols) {}
   const Sprite& getSprite(uint8_t n, const Point2Di8 &position) {
-    if(n >= nSymbols) n = 0;
+    if (n >= nSymbols) n = 0;
     cur.data = bitmapBase + n*cur.width*((cur.height+7)/8);
     sprite.position = position;
     return sprite;
@@ -117,12 +116,12 @@ struct BitCanvas {
   }
 
   void render(const Sprite &sprite) {
-    if(!sprite.bitmap) return;
+    if (!sprite.bitmap) return;
     
     //sprite rectangle
     const int16_t sX0 = (int16_t)sprite.position.x - xOffset, sX1 = sX0 + min(sprite.bitmap->width, sprite.limitRenderWidthTo);
     const int16_t sY0 = (int16_t)sprite.position.y - (sprite.anchor == Sprite::ANCHOR_BOTTOM_LEFT? sprite.bitmap->height : 0) - yOffset, sY1 = sY0 + sprite.bitmap->height;
-    if(sX0 >= width || sX1 <= 0 || sY0 >= height || sY1 <= 0) return;
+    if (sX0 >= width || sX1 <= 0 || sY0 >= height || sY1 <= 0) return;
 
     //cycle on canvas
     const uint8_t Xto = min(sX1, width);
@@ -161,11 +160,11 @@ struct BitCanvas {
         uint8_t& canvasByte = bitmap_yw[x];
         
         //apply mask
-        if(sMask_yw_1) canvasByte &= ~(flashByte(sMask_yw_1, sx) >> (8-bitOffset));
-        if(sMask_yw) canvasByte &= ~(flashByte(sMask_yw, sx) << bitOffset);
+        if (sMask_yw_1) canvasByte &= ~(flashByte(sMask_yw_1, sx) >> (8-bitOffset));
+        if (sMask_yw) canvasByte &= ~(flashByte(sMask_yw, sx) << bitOffset);
         //apply sprite bitmap data
-        if(sData_yw_1) canvasByte |= flashByte(sData_yw_1, sx) >> (8-bitOffset);
-        if(sData_yw) canvasByte |= flashByte(sData_yw, sx) << bitOffset;
+        if (sData_yw_1) canvasByte |= flashByte(sData_yw_1, sx) >> (8-bitOffset);
+        if (sData_yw) canvasByte |= flashByte(sData_yw, sx) << bitOffset;
       }
     }
   }
@@ -185,7 +184,7 @@ struct VirtualBitCanvas : BitCanvas {
   //returns true on wrap
   bool nextPart() {
     clear();
-    if(offsetCoord + bufferSize >= virtualSize) {
+    if (offsetCoord + bufferSize >= virtualSize) {
       offsetCoord = 0;
       return true;
     }
@@ -203,19 +202,19 @@ struct CollisionDetector {
   template<class DerivedFromSprite>
   static bool check(const Sprite &s, const DerivedFromSprite* const* ss, uint8_t size) {
     while(size--)
-      if(check(s, **ss++)) return true;
+      if (check(s, **ss++)) return true;
     return false;
   }
     
   static bool check(const Sprite &s1, const Sprite &s2) {
-    if(!s1.bitmap || !s2.bitmap) return false;
+    if (!s1.bitmap || !s2.bitmap) return false;
     
     const uint8_t width = s1.bitmap->width;
     const uint8_t height = s1.bitmap->height;
     //sprite 2 rectangle in sprite 1 frame
     const int16_t sX0 = (int16_t)s2.position.x - s1.position.x, sX1 = sX0 + min(s2.bitmap->width, s2.limitRenderWidthTo);
     const int16_t sY0 = (int16_t)s2.position.y - (s2.anchor == Sprite::ANCHOR_BOTTOM_LEFT? s2.bitmap->height : 0) - s1.position.y + (s1.anchor == Sprite::ANCHOR_BOTTOM_LEFT? s1.bitmap->height : 0), sY1 = sY0 + s2.bitmap->height;  
-    if(sX0 >= width || sX1 <= 0 || sY0 >= height || sY1 <= 0) return false; //no rectangle intersection
+    if (sX0 >= width || sX1 <= 0 || sY0 >= height || sY1 <= 0) return false; //no rectangle intersection
     
     //cycle on sprite 1
     const uint8_t Xto = min(sX1, width);
@@ -233,7 +232,7 @@ struct CollisionDetector {
       
       for(uint8_t x = max(sX0, 0); x < Xto; ++x) {
         const uint8_t sx = x - sX0;
-        if((flashByte(s1data, x) & (1<<yBit)) && (flashByte(s2data, sx) & (1<<syBit))) return true;
+        if ((flashByte(s1data, x) & (1<<yBit)) && (flashByte(s2data, sx) & (1<<syBit))) return true;
       }
     }
     
@@ -246,14 +245,14 @@ private:
 struct SpawnHold {
   bool tryAcquire(const void* me, const uint8_t countBeforeSpawn) {
     //Counter is free, acquire it and wait
-    if(owner == 0) {
+    if (owner == 0) {
       counter = countBeforeSpawn;
       owner = me;
       return false;
     }
     //we're owning this counter, decrement or free it
-    if(owner == me) {
-      if(counter) {
+    if (owner == me) {
+      if (counter) {
         --counter;
         return false;
       } else {

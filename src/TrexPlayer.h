@@ -1,9 +1,8 @@
 /*
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
- * Project page: https://github.com/AlexIII/t-rex-duino
+ * Project page: https://github.com/neurino/t-rex-duino
  * Author: github.com/AlexIII
- * E-mail: endoftheworld@bk.ru
  * License: MIT
 */ 
 
@@ -40,14 +39,14 @@ struct TrexPlayer : SpriteAnimated {
   }
 
   void jump() {
-      if(isJumping() || state == DEAD) return;
+      if (isJumping() || state == DEAD) return;
       vy = state == UP? T_REX_JUMP_MOMENTUM : T_REX_JUMP_MOMENTUM_DUCKED;
   }
   void duck(const bool toDuck) {
-    if(toDuck) {
-      if(state == UP && !isJumping()) state = DUCK;
+    if (toDuck) {
+      if (state == UP && !isJumping()) state = DUCK;
     } else {
-      if(state == DUCK) state = UP;
+      if (state == DUCK) state = UP;
     }
   }
   void die() {
@@ -66,7 +65,7 @@ protected:
   bool isJumping() const { return dy != 0 || vy != 0; }
   void motionStep() {
     //dirty fix to prolong the jump
-    if(abs(vy) <= 1 && !skipStep) {
+    if (abs(vy) <= 1 && !skipStep) {
       skipStep = true;
       return;
     }
@@ -74,7 +73,7 @@ protected:
     
     dy += vy;
     position.y -= vy;
-    if(dy) --vy;
+    if (dy) --vy;
     else vy = 0;
   }
 
@@ -82,23 +81,23 @@ protected:
   uint8_t bitmapId = 0;
   uint8_t blinkCnt = 0;
   void animationStep() {
-    if(blinkCnt) --blinkCnt;
-    if(blinkCnt & 1) {
+    if (blinkCnt) --blinkCnt;
+    if (blinkCnt & 1) {
       bitmap = 0;
       return;
     }
     
     uint8_t start = 0, end = 0;
 
-    if(state == UP)
+    if (state == UP)
       start = T_REX_SPRITE_UP_START, end = isJumping()? T_REX_SPRITE_UP_START : T_REX_SPRITE_UP_END;
-    else if(state == DUCK)
+    else if (state == DUCK)
       start = T_REX_SPRITE_DUCK_START, end = isJumping()? T_REX_SPRITE_DUCK_START : T_REX_SPRITE_DUCK_END;
-    else if(state == DEAD)
+    else if (state == DEAD)
       start = T_REX_SPRITE_DEAD_UP, end = T_REX_SPRITE_DEAD_UP;
 
-    if(!(bitmapId >= start && bitmapId < end)) bitmapId = start;
-    if(bitmapId + 1 < end) ++bitmapId;
+    if (!(bitmapId >= start && bitmapId < end)) bitmapId = start;
+    if (bitmapId + 1 < end) ++bitmapId;
     else bitmapId = start;
     
     bitmap = trex_sprites[bitmapId];
