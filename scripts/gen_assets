@@ -20,12 +20,5 @@ fi
 shopt -s nullglob
 
 for png_path in "$IMG_DIR"/*.png; do
-  png_name="$(basename "$png_path")"
-  header_name="${png_name%.png}"
-
-  if [[ "$header_name" =~ ^(.*-[0-9])s(-.*)?$ ]]; then
-    header_name="${BASH_REMATCH[1]}${BASH_REMATCH[2]}"
-  fi
-
-  "$PYTHON_BIN" "$CONVERTER" "$png_path" > "$ASSET_DIR/$header_name.h"
+  "$PYTHON_BIN" "$CONVERTER" "$png_path" "$ASSET_DIR"
 done

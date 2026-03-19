@@ -27,7 +27,7 @@
 /* Hardware Connections */
 //buttons
 #define JUMP_BUTTON 6
-#define DUCK_BUTTON 5
+#define DUCK_BUTTON 7
 //LCD
 #define LCD_CS 10
 #define LCD_DC 9

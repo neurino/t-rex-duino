@@ -13,13 +13,13 @@
 #include "engine.h"
 
 /* T-rex */
-#include "assets/trex-up-1.h"
-#include "assets/trex-up-2.h"
-#include "assets/trex-up-3.h"
-#include "assets/trex-duck-1.h"
-#include "assets/trex-duck-2.h"
-#include "assets/trex-dead-1-no-outline.h"
-#include "assets/trex-dead-2-no-outline.h"
+#include "assets/trex-up-1s.h"
+#include "assets/trex-up-2s.h"
+#include "assets/trex-up-3s.h"
+#include "assets/trex-duck-1s.h"
+#include "assets/trex-duck-2s.h"
+#include "assets/trex-dead-1s-no-outline.h"
+#include "assets/trex-dead-2s-no-outline.h"
 static const BitmapMasked trex_up_1(trex_up_1s_bitmap, trex_up_1s_mask);
 static const BitmapMasked trex_up_2(trex_up_2s_bitmap, trex_up_2s_mask);
 static const BitmapMasked trex_up_3(trex_up_3s_bitmap, trex_up_3s_mask);
