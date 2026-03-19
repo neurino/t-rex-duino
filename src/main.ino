@@ -88,7 +88,7 @@ uint8_t randByte() {
 void renderNumber(BitCanvas& canvas, Point2Di8 point, const uint16_t number) {
   uint16_t base = 10000;
   while(base) {
-    const uint8_t digit = (number/base)%10;
+    const uint8_t digit = (number / base) % 10;
     canvas.render(numbers.getSprite(digit, point));
     base /= 10;
     point.x += numbers.getWidth() + 1;
@@ -188,17 +188,17 @@ void gameLoop(uint16_t &hiScore) {
     //score keeping
     if(score < 0xFFFE) ++score;
     //make game progressively faster
-    if(!(score%INCREASE_FPS_EVERY_N_SCORE_POINTS) && targetFPS < TARGET_FPS_MAX) ++targetFPS;
+    if(!(score % INCREASE_FPS_EVERY_N_SCORE_POINTS) && targetFPS < TARGET_FPS_MAX) ++targetFPS;
     heartsSprite.limitRenderWidthTo = 6*lives + 1;
     //switch day and night
-    if(!(score%DAY_NIGHT_SWITCH_CYCLES)) lcd.setInverse(night = !night);
+    if(!(score % DAY_NIGHT_SWITCH_CYCLES)) lcd.setInverse(night = !night);
 
     //print CPU load statistics
     const uint32_t dt = millis() - prvT;
-    const uint8_t frameTime = 1000/targetFPS;
-    uint32_t left = frameTime > dt? frameTime - dt : 0;
-    Serial.print("CPU: ");
-    Serial.print(100 - 100*left / frameTime);
+    const uint8_t frameTime = 1000 / targetFPS;
+    uint32_t left = frameTime > dt ? frameTime - dt : 0;
+    Serial.print("CPU ");
+    Serial.print(100 - 100 * left / frameTime);
     Serial.print("% ");
     Serial.println(dt);
 
@@ -222,12 +222,15 @@ void splashScreen() {
 void setup() {
   pinMode(JUMP_BUTTON, INPUT_PULLUP);
   pinMode(DUCK_BUTTON, INPUT_PULLUP);
-  Serial.begin(250000);
+  if(isPressedJump() && isPressedDuck()) {
+    hiScore = 0;
+    EEPROM.put(EEPROM_HI_SCORE, hiScore);
+  }
+  Serial.begin(57600);
   lcd.begin();
   splashScreen();
   lcd.setAddressingMode(lcd.VerticalAddressingMode);
-  srand((randByte()<<8) | randByte());
-  //EEPROM.put(EEPROM_HI_SCORE, hiScore); //uncomment to set HI score to 0
+  srand((randByte() << 8) | randByte());
   EEPROM.get(EEPROM_HI_SCORE, hiScore);
   if(hiScore == 0xFFFF) hiScore = 0;
 }
@@ -236,7 +239,8 @@ void loop() {
   if(firstStart || isPressedJump()) {
     firstStart = false;
     gameLoop(hiScore);
-    EEPROM.put(EEPROM_HI_SCORE, hiScore);
+    EEPROM.update(EEPROM_HI_SCORE, hiScore & 0xFF);
+    EEPROM.update(EEPROM_HI_SCORE + 1, hiScore >> 8);
     //wait until the jump button is released
     while(isPressedJump());
     const uint32_t restartDelayStart = millis();

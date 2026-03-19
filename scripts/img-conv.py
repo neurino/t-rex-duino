@@ -16,7 +16,6 @@ Pixel = Tuple[int, ...]
 Pixels = List[Pixel]
 PixelTestFunc = Callable[[Pixel], bool]
 
-
 def to_bitmap_array(pixels: Pixels, width: int, is_pixel_set: PixelTestFunc) -> List[int]:
     buffer: List[int] = []
     height = len(pixels) // width
@@ -33,14 +32,12 @@ def to_bitmap_array(pixels: Pixels, width: int, is_pixel_set: PixelTestFunc) -> 
 
     return buffer
 
-
 def to_sprite_format(width: int, height: int, bitmap: List[int]) -> List[int]:
     if width > 255:
         raise ValueError(f"width is too big: {width}")
     if height > 255:
         raise ValueError(f"height is too big: {height}")
     return [width, height] + bitmap
-
 
 def to_hex_str(data: List[int]) -> str:
     buffer = ""
@@ -52,35 +49,25 @@ def to_hex_str(data: List[int]) -> str:
                 buffer += "\n"
     return buffer
 
-
-def to_bitmap_str(
-    array_name: str,
-    pixels: Pixels,
-    width: int,
-    is_pixel_set: PixelTestFunc,
-) -> str:
+def to_bitmap_str(array_name: str, pixels: Pixels, width: int, is_pixel_set: PixelTestFunc) -> str:
     height = len(pixels) // width
     bitmap = to_bitmap_array(pixels, width, is_pixel_set)
     sprite = to_sprite_format(width, height, bitmap)
     return f"static const uint8_t {array_name}[] PROGMEM = {{\n{to_hex_str(sprite)}\n}};\n"
-
 
 def is_not_white(pixel: Pixel) -> bool:
     is_white = pixel[0] > 127 and pixel[1] > 127 and pixel[2] > 127
     is_transparent = len(pixel) >= 4 and pixel[3] == 0
     return not (is_white or is_transparent)
 
-
 def is_not_transparent(pixel: Pixel) -> bool:
     return len(pixel) < 4 or pixel[3] != 0
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("imgfile")
     parser.add_argument("outdir")
     return parser.parse_args()
-
 
 def main() -> None:
     args = parse_args()
@@ -102,7 +89,6 @@ def main() -> None:
         + to_bitmap_str(array_mask_name, pixels, width, is_not_transparent),
         encoding="ascii",
     )
-
 
 if __name__ == "__main__":
     main()
