@@ -55,6 +55,12 @@ static const BitmapMasked cacti_3s(cacti_small_small_small_bitmap, cacti_small_s
 static const BitmapMasked pterodactyl_1(pterodactyl_1_bitmap, pterodactyl_1_mask);
 static const BitmapMasked pterodactyl_2(pterodactyl_2_bitmap, pterodactyl_2_mask);
 
+/* Ufo */
+#include "assets/ufo-1.h"
+#include "assets/ufo-2.h"
+static const BitmapMasked ufo_1(ufo_1_bitmap, ufo_1_mask);
+static const BitmapMasked ufo_2(ufo_2_bitmap, ufo_2_mask);
+
 /* Font */
 const uint8_t font5x8_digits_data[] PROGMEM = {
   0x3E, 0x51, 0x49, 0x45, 0x3E,// 0 0x30

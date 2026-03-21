@@ -17,6 +17,8 @@
 #define GROUND_CACTI_SCROLL_SPEED 3 //pixels per game cycle
 #define PTERODACTY_SPEED 5 //pixels per game cycle
 #define PTERODACTY_RESPAWN_RATE 255 //lower -> more frequent, max 255
+#define UFO_SPEED 6 //pixels per game cycle
+#define UFO_RESPAWN_RATE 255 //lower -> more frequent, max 255
 #define INCREASE_FPS_EVERY_N_SCORE_POINTS 256 //better to be power of 2
 #define LIVES_START 3
 #define LIVES_MAX 5
@@ -54,6 +56,7 @@
 #include "Ground.h"
 #include "Cactus.h"
 #include "Pterodactyl.h"
+#include "Ufo.h"
 #include "HeartLive.h"
 
 /* Defines and globals */
@@ -123,9 +126,10 @@ void gameLoop(uint16_t &hiScore) {
   Cactus cactus1(spawnHolder);
   Cactus cactus2(spawnHolder);
   Pterodactyl pterodactyl1(spawnHolder);
+  Ufo ufo1(spawnHolder);
   HeartLive heartLive;
-  const array<SpriteAnimated*, 8> sprites{{&ground1, &ground2, &ground3, &cactus1, &cactus2, &pterodactyl1, &heartLive, &trex}};
-  const array<SpriteAnimated*, 3> enemies{{&cactus1, &cactus2, &pterodactyl1}};
+  const array<SpriteAnimated*, 9> sprites{{&ground1, &ground2, &ground3, &cactus1, &cactus2, &pterodactyl1, &ufo1, &heartLive, &trex}};
+  const array<SpriteAnimated*, 4> enemies{{&cactus1, &cactus2, &pterodactyl1, &ufo1}};
 
   //static sprites
   const Sprite gameOverSprite(&game_overver_bm, {15, 12});
