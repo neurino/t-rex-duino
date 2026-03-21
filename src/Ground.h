@@ -2,7 +2,7 @@
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
  * Project page: https://github.com/neurino/t-rex-duino
- * Author: github.com/AlexIII
+ * Author: github.com/AlexIII and github.com/neurino
  * License: MIT
 */ 
 

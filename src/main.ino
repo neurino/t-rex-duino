@@ -9,7 +9,7 @@
  * LCD: OLED SSD1306 128x64
 */ 
 
-//#define PRINT_DEBUG_INFO //uncomment to print CPU usage to Serial
+#define PRINT_DEBUG_INFO //uncomment to print CPU usage to Serial
 
 /* Game Balance Settings */
 #define PLAYER_SAFE_ZONE_WIDTH 32 //minimum distance between obstacles (px)
@@ -197,10 +197,10 @@ void gameLoop(uint16_t &hiScore) {
 #ifdef PRINT_DEBUG_INFO
     //print CPU load statistics
     const uint32_t dt = millis() - prvT;
-    uint32_t left = frameTime > dt ? frameTime - dt : 0;
-    Serial.print("CPU ");
-    Serial.print(100 - 100 * left / frameTime);
-    Serial.print("% ");
+    //~ uint32_t left = frameTime > dt ? frameTime - dt : 0;
+    //~ Serial.print("CPU ");
+    //~ Serial.print(100 - 100 * left / frameTime);
+    //~ Serial.print("% ");
     Serial.println(dt);
 #endif
 

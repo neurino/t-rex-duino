@@ -2,7 +2,7 @@
  * Project name: T-rex-duino
  * Description: T-rex game from Chrome brower rewritten for Arduino
  * Project page: https://github.com/neurino/t-rex-duino
- * Author: github.com/AlexIII
+ * Author: github.com/AlexIII and github.com/neurino
  * License: MIT
 */ 
 
@@ -15,6 +15,7 @@
 #define T_REX_JUMP_MOMENTUM 8 //jump height = 6 -> 21px, 7 -> 28px, 8 -> 36px
 #define T_REX_JUMP_MOMENTUM_DUCKED 6
 #define T_REX_START_POINT {5, 60}
+#define T_REX_GRAVITY 1
 
 static const BitmapMasked* const trex_sprites[] = {&trex_up_1, &trex_up_2, &trex_up_3, &trex_duck_1, &trex_duck_2, &trex_dead_1, &trex_dead_2};
 #define T_REX_SPRITE_UP_START 0
@@ -59,22 +60,15 @@ struct TrexPlayer : SpriteAnimated {
 
 protected:
   //motion
-  int8_t dy = 0;
   int8_t vy = 0;
-  bool skipStep = false;
-  bool isJumping() const { return dy != 0 || vy != 0; }
+  bool isJumping() const { return position.y != 60 || vy != 0; }
   void motionStep() {
-    //dirty fix to prolong the jump
-    if (abs(vy) <= 1 && !skipStep) {
-      skipStep = true;
-      return;
-    }
-    skipStep = false;
-    
-    dy += vy;
     position.y -= vy;
-    if (dy) --vy;
-    else vy = 0;
+    vy -= T_REX_GRAVITY;
+    if (position.y > 60) {
+      position.y = 60;
+      vy = 0;
+    }
   }
 
   //animation
