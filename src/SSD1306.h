@@ -85,6 +85,9 @@ public:
   void setInverse(const bool v) {
     sendc(v? 0xA7 : 0xA6);
   }
+  void setDisplayEnabled(const bool enabled) {
+    sendc(enabled ? OLED_DISPLAY_ON : OLED_DISPLAY_OFF);
+  }
   void setAddressingMode(const AddressingMode addressingMode) {
     sendc(0x20, addressingMode);
   }

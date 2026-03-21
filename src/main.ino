@@ -45,6 +45,7 @@
 #define VIRTUAL_WIDTH_BUFFER_COLS 16
 
 /* Includes */
+#include <avr/io.h>
 #include <SPI.h>
 #include <EEPROM.h>
 #include "SSD1306.h"
@@ -59,6 +60,13 @@
 #define EEPROM_HI_SCORE 16 //2 bytes
 #define LCD_BYTE_SIZE (LCD_WIDTH * LCD_HEIGHT / 8)
 #define LCD_PART_BUFF_SIZE ((LCD_HEIGHT / 8) * VIRTUAL_WIDTH_BUFFER_COLS)
+
+static uint8_t resetFlags __attribute__((section(".noinit")));
+void saveResetFlags() __attribute__((naked, section(".init3")));
+void saveResetFlags() {
+  resetFlags = MCUSR;
+  MCUSR = 0;
+}
 
 static SSD1306<SPIClass> lcd(SPI, LCD_CS, LCD_DC, LCD_RESET, LCD_BYTE_SIZE);
 static uint16_t hiScore = 0;
@@ -193,18 +201,13 @@ void gameLoop(uint16_t &hiScore) {
     //switch day and night
     if (!(score % DAY_NIGHT_SWITCH_CYCLES)) lcd.setInverse(night = !night);
 
-    const uint8_t frameTime = 1000 / targetFPS;
 #ifdef PRINT_DEBUG_INFO
-    //print CPU load statistics
-    const uint32_t dt = millis() - prvT;
-    //~ uint32_t left = frameTime > dt ? frameTime - dt : 0;
-    //~ Serial.print("CPU ");
-    //~ Serial.print(100 - 100 * left / frameTime);
-    //~ Serial.print("% ");
-    Serial.println(dt);
+    //print render time
+    Serial.println(millis() - prvT);
 #endif
 
     //throttle
+    const uint8_t frameTime = 1000 / targetFPS;
     while(millis() - prvT < frameTime);
     prvT = millis();
   } 
@@ -224,7 +227,7 @@ void splashScreen() {
 void setup() {
   pinMode(JUMP_BUTTON, INPUT_PULLUP);
   pinMode(DUCK_BUTTON, INPUT_PULLUP);
-  if (isPressedJump() && isPressedDuck()) {
+  if ((resetFlags & _BV(EXTRF)) && isPressedDuck()) {
     hiScore = 0;
     EEPROM.put(EEPROM_HI_SCORE, hiScore);
   } else {
@@ -242,6 +245,7 @@ void setup() {
 
 void loop() {
   if (firstStart || isPressedJump()) {
+    lcd.setDisplayEnabled(true);
     firstStart = false;
     gameLoop(hiScore);
     EEPROM.update(EEPROM_HI_SCORE, hiScore & 0xFF);
@@ -250,5 +254,8 @@ void loop() {
     while(isPressedJump());
     const uint32_t restartDelayStart = millis();
     while(millis() - restartDelayStart < 500);
+    const uint32_t gameOverScreenStart = millis();
+    while(!isPressedJump() && millis() - gameOverScreenStart < 7500);
+    if (!isPressedJump()) lcd.setDisplayEnabled(false);
   }
 }
