@@ -29,12 +29,12 @@
 
 /* Hardware Connections */
 //buttons
-#define JUMP_BUTTON 6
-#define DUCK_BUTTON 7
+#define JUMP_BUTTON 2
+#define DUCK_BUTTON 3
 //LCD
-#define LCD_CS 10
-#define LCD_DC 9
-#define LCD_RESET 8
+#define LCD_CS 9
+#define LCD_DC 8
+#define LCD_RESET 7
 //LCD_SDA -> 11 (SPI SCK)
 //LCD_SCL -> 13 (SPI MOSI)
 
