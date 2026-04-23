@@ -1,10 +1,16 @@
-# Python >= 3.7.1
+"""
 
-# This script converts bitmap image *.png into two c-array: one
-# containing bitmap data (*_bitmap) and other containing transparency data (*_mask).
-# First two bytes in arrays are width and height in pixels.
-# The rest is bitmap data. Data is stored in row-major order.
-# Each row element (byte) represents a *column* of 8 pixels.
+This script converts bitmap image *.png into two c-array:
+
+    - one containing bitmap data (*_bitmap)
+    - another containing transparency data (*_mask)
+
+First two bytes in arrays are width and height in pixels, the rest is
+bitmap data. Data is stored in row-major order.
+
+Each row element (byte) represents a *column* of 8 pixels.
+
+"""
 
 import argparse
 from pathlib import Path
@@ -69,7 +75,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("outdir")
     return parser.parse_args()
 
-def main() -> None:
+def main():
     args = parse_args()
     image_path = Path(args.imgfile)
     output_dir = Path(args.outdir)
@@ -79,14 +85,12 @@ def main() -> None:
         pixels = list(image.getdata())
 
     array_name = image_path.stem.replace("-", "_")
-    array_data_name = f"{array_name}_bitmap"
-    array_mask_name = f"{array_name}_mask"
     output_path = output_dir / f"{image_path.stem}.h"
 
     output_path.write_text(
-        to_bitmap_str(array_data_name, pixels, width, is_not_white)
+        to_bitmap_str(f"{array_name}_bitmap", pixels, width, is_not_white)
         + "\n"
-        + to_bitmap_str(array_mask_name, pixels, width, is_not_transparent),
+        + to_bitmap_str(f"{array_name}_mask", pixels, width, is_not_transparent),
         encoding="ascii",
     )
 

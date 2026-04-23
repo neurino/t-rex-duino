@@ -25,7 +25,7 @@
 #define SPAWN_NEW_LIVE_MIN_CYCLES 800
 #define DAY_NIGHT_SWITCH_CYCLES 1024 //better to be power of 2
 #define TARGET_FPS_START 23
-#define TARGET_FPS_MAX 48 //gradually increase FPS to that value to make the game faster and harder
+#define THROTTLE_DISABLE_THRESHOLD 8 //disable throttling after this many consecutive over-budget frames
 
 /* Hardware Connections */
 //buttons
@@ -35,8 +35,8 @@
 #define LCD_CS 9
 #define LCD_DC 8
 #define LCD_RESET 7
-//LCD_SDA -> 11 (SPI SCK)
-//LCD_SCL -> 13 (SPI MOSI)
+//LCD_SCL_D0 -> 11 (SPI SCK)
+//LCD_SDA_D1 -> 13 (SPI MOSI)
 
 /* Display Settings */
 #define LCD_HEIGHT 64U
@@ -138,12 +138,14 @@ void gameLoop(uint16_t &hiScore) {
   Sprite heartsSprite(&hearts_5x_bm, {95, 8});
 
   //game variables
-  uint32_t prvT = 0;
+  uint32_t prvT = millis();
   bool gameOver = false;
   uint16_t score = 0;
   uint8_t targetFPS = TARGET_FPS_START;
+  uint8_t overBudgetFrames = 0;
   uint8_t lives = LIVES_START;
   bool night = false;
+  bool throttlingEnabled = true;
   lcd.setInverse(night);
 
   //main cycle
@@ -170,7 +172,10 @@ void gameLoop(uint16_t &hiScore) {
 
     //exit game on game over
     if (gameOver) {
-      if (score > hiScore) hiScore = score;
+      if (score > hiScore) {
+        hiScore = score;
+        EEPROM.put(EEPROM_HI_SCORE, hiScore);
+      }
       return;
     }
 
@@ -200,19 +205,28 @@ void gameLoop(uint16_t &hiScore) {
     //score keeping
     if (score < 0xFFFE) ++score;
     //make game progressively faster
-    if (!(score % INCREASE_FPS_EVERY_N_SCORE_POINTS) && targetFPS < TARGET_FPS_MAX) ++targetFPS;
+    if (throttlingEnabled && !(score % INCREASE_FPS_EVERY_N_SCORE_POINTS) && targetFPS < 0xFF) ++targetFPS;
     heartsSprite.limitRenderWidthTo = 6*lives + 1;
     //switch day and night
     if (!(score % DAY_NIGHT_SWITCH_CYCLES)) lcd.setInverse(night = !night);
 
+    const uint32_t renderTime = millis() - prvT;
+
 #ifdef PRINT_DEBUG_INFO
     //print render time
-    Serial.println(millis() - prvT);
+    Serial.println(renderTime);
 #endif
 
     //throttle
-    const uint8_t frameTime = 1000 / targetFPS;
-    while(millis() - prvT < frameTime);
+    if (throttlingEnabled) {
+      const uint8_t frameTime = 1000 / targetFPS;
+      if (renderTime < frameTime) {
+        overBudgetFrames = 0;
+        while(millis() - prvT < frameTime);
+      } else if (++overBudgetFrames >= THROTTLE_DISABLE_THRESHOLD) {
+        throttlingEnabled = false;
+      }
+    }
     prvT = millis();
   } 
 }
@@ -248,12 +262,10 @@ void setup() {
 }
 
 void loop() {
-  if (firstStart || isPressedJump()) {
+  if (firstStart || isPressedJump() || isPressedDuck()) {
     lcd.setDisplayEnabled(true);
     firstStart = false;
     gameLoop(hiScore);
-    EEPROM.update(EEPROM_HI_SCORE, hiScore & 0xFF);
-    EEPROM.update(EEPROM_HI_SCORE + 1, hiScore >> 8);
     //wait until the jump button is released
     while(isPressedJump());
     const uint32_t restartDelayStart = millis();
