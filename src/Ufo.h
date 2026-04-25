@@ -51,7 +51,7 @@ private:
       --animationSkip;
       return;
     }
-    animationSkip = 10;
+    animationSkip = bitmap == ufo_sprites[0] ? 8 : 4;
     bitmap = bitmap == ufo_sprites[0] ? ufo_sprites[1] : ufo_sprites[0];
   }
 };
