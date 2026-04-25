@@ -3,8 +3,6 @@
 Clone of T-rex game from Chrome browser rewritten for Arduino.
 
 ![demo][]  
-![assembled 01][]
-![assembled 02][]
 
 Forked from [github.com/AlexIII/t-rex-duino] to support SPI SSD1306
 0.96" OLED display and re-organised as a [PlatformIO][] project.
@@ -19,11 +17,15 @@ A few components needed:
 
 ## Instructions
 
-1. Assemble
+1. Assemble (example below, see used pins in [src/main.ino]())
 2. [Install PlatformIO core][]
 3. Upload with `$ pio run -t upload`
 4. Play!
 5. Repeat from step 4
+
+![assembled 01][]
+
+![assembled 02][]
 
 ## License
 
