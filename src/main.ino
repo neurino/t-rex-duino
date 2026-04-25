@@ -43,11 +43,9 @@
 #define LCD_WIDTH 128U
 
 /* Render Settings */
-//#define VIRTUAL_HEIGHT_BUFFER_ROWS_BY_8_PIXELS 1
 #define VIRTUAL_WIDTH_BUFFER_COLS 16
 
 /* Includes */
-#include <avr/io.h>
 #include <SPI.h>
 #include <EEPROM.h>
 #include "SSD1306.h"
@@ -63,13 +61,7 @@
 #define EEPROM_HI_SCORE 16 //2 bytes
 #define LCD_BYTE_SIZE (LCD_WIDTH * LCD_HEIGHT / 8)
 #define LCD_PART_BUFF_SIZE ((LCD_HEIGHT / 8) * VIRTUAL_WIDTH_BUFFER_COLS)
-
-static uint8_t resetFlags __attribute__((section(".noinit")));
-void saveResetFlags() __attribute__((naked, section(".init3")));
-void saveResetFlags() {
-  resetFlags = MCUSR;
-  MCUSR = 0;
-}
+#define HI_SCORE_RESET_HOLD_MS 2000
 
 static SSD1306<SPIClass> lcd(SPI, LCD_CS, LCD_DC, LCD_RESET, LCD_BYTE_SIZE);
 static uint16_t hiScore = 0;
@@ -239,19 +231,27 @@ void splashScreen() {
     lcd.fillScreen(buff, sizeof(buff));
   }
   const uint32_t splashStart = millis();
-  while(!isPressedJump() && millis() - splashStart < 5000);
+  uint32_t duckHoldStart = 0;
+  bool hiScoreReset = false;
+  while(!isPressedJump() && millis() - splashStart < 5000) {
+    if (isPressedDuck()) {
+      if (!duckHoldStart) duckHoldStart = millis();
+      if (!hiScoreReset && millis() - duckHoldStart >= HI_SCORE_RESET_HOLD_MS) {
+        hiScore = 0;
+        EEPROM.put(EEPROM_HI_SCORE, hiScore);
+        hiScoreReset = true;
+      }
+    } else {
+      duckHoldStart = 0;
+    }
+  }
 }
 
 void setup() {
   pinMode(JUMP_BUTTON, INPUT_PULLUP);
   pinMode(DUCK_BUTTON, INPUT_PULLUP);
-  if ((resetFlags & _BV(EXTRF)) && isPressedDuck()) {
-    hiScore = 0;
-    EEPROM.put(EEPROM_HI_SCORE, hiScore);
-  } else {
-    EEPROM.get(EEPROM_HI_SCORE, hiScore);
-    if (hiScore == 0xFFFF) hiScore = 0; // 0xFFFF is the default EEPROM erased state
-  }
+  EEPROM.get(EEPROM_HI_SCORE, hiScore);
+  if (hiScore == 0xFFFF) hiScore = 0; // 0xFFFF is the default EEPROM erased state
 #ifdef PRINT_DEBUG_INFO  
   Serial.begin(57600);
 #endif
