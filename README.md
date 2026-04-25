@@ -13,7 +13,7 @@ A few components needed:
   - If you want to use Uno, Nano etc. change board in `platformio.ini`
 - SPI OLED display 128x64 SSD1306 (or SSD1309)
 - Two buttons: one to jump, one to duck
-  - Hold duck button during splash screen for 2 seconds Keep duck button both pressed on power-up to reset hi score
+  - Hold duck button during splash screen for 2 seconds to reset hi score
 
 ## Instructions
 
